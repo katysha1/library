@@ -1,46 +1,28 @@
 # library
-Домашнее задание по теме Работа с postgresql, ч.3
-Необходимо разработать систему учета книг в библиотеке, которая позволяет добавлять новые книги, регистрировать читателей и отслеживать выдачу книг. В системе должны быть реализованы следующие функции:
+### Домашнее задание по теме Работа с postgresql, ч.3
 
+Необходимо разработать систему учета книг в библиотеке, которая позволяет добавлять новые книги, 
+регистрировать читателей и отслеживать выдачу книг. В системе должны быть реализованы следующие функции:
 
+- Создание базы данных и таблиц:
+- Таблица для хранения книг (Books):
+- id (INTEGER, PRIMARY KEY)
+- title (VARCHAR(100), NOT NULL)
+- author (VARCHAR(50), NOT NULL)
+- published_year (INTEGER)
+- quantity (INTEGER, NOT NULL, CHECK (quantity >= 0))
 
-Создание базы данных и таблиц:
-
-Таблица для хранения книг (Books):
-
-id (INTEGER, PRIMARY KEY)
-
-title (VARCHAR(100), NOT NULL)
-
-author (VARCHAR(50), NOT NULL)
-
-published_year (INTEGER)
-
-quantity (INTEGER, NOT NULL, CHECK (quantity >= 0))
-
-
-
-Таблица для хранения читателей (Readers):
-
-id (INTEGER, PRIMARY KEY)
-
-name (VARCHAR(100), NOT NULL)
-
-email (VARCHAR(100), UNIQUE)
-
-
+- Таблица для хранения читателей (Readers):
+- id (INTEGER, PRIMARY KEY)
+- name (VARCHAR(100), NOT NULL)
+- email (VARCHAR(100), UNIQUE)
 
 Таблица для регистрации выдачи книг (BorrowedBooks):
-
-id (INTEGER, PRIMARY KEY)
-
-book_id (INTEGER, FOREIGN KEY ссылается на Books.id)
-
-reader_id (INTEGER, FOREIGN KEY ссылается на Readers.id)
-
-borrow_date (TIMESTAMP, дата выдачи книги)
-
-return_date (TIMESTAMP, дата возврата книги, может быть NULL)
+- id (INTEGER, PRIMARY KEY)
+- book_id (INTEGER, FOREIGN KEY ссылается на Books.id)
+- reader_id (INTEGER, FOREIGN KEY ссылается на Readers.id)
+- borrow_date (TIMESTAMP, дата выдачи книги)
+- return_date (TIMESTAMP, дата возврата книги, может быть NULL)
 
 
 
