@@ -131,11 +131,17 @@ def return_book(reader_id: int, book_id: int) -> str:
         print("Книга не найдена в библиотеке.")
         return
 
-    book.quantity += 1
-    borrow.return_date = datetime.now()
-    session.commit()
-    print(f"Книга '{book.title}' успешно возвращена.")
-    return
+    try:
+        book.quantity += 1
+        borrow.return_date = datetime.now()
+        session.commit()
+        print(f"Книга '{book.title}' успешно возвращена.")
+        return
+
+    except Exception as e:
+        session.rollback()
+        return f"Ошибка при возврате: {str(e)}"
+
 
 
 def sort_by_year() -> list:
@@ -273,7 +279,7 @@ if __name__ == "__main__":
         # borrowed_books_list()
 
         # return_book(12, 4)
-        # return_book(8, 2)
+        return_book(8, 2)
         # return_book(2, 5)
 
         conn.commit()
