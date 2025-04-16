@@ -30,61 +30,61 @@
 
 ## Код на создание таблиц и подключения к базе данных с помощью engine в файле tables
 """
-from sqlalchemy import (
-    Column, Integer, String, Text, ForeignKey, DECIMAL, TIMESTAMP, CheckConstraint, create_engine
-)
+    from sqlalchemy import (
+        Column, Integer, String, Text, ForeignKey, DECIMAL, TIMESTAMP, CheckConstraint, create_engine
+    )
+    
+    from sqlalchemy.orm import relationship, Session, foreign
+    from sqlalchemy.ext.declarative import declarative_base
+    import warnings
+    from sqlalchemy.schema import CreateTable
+    from datetime import datetime
+    
+    warnings.filterwarnings("ignore")
+    Base = declarative_base()
+    class Books(Base):
+        __tablename__ = 'books'
 
-from sqlalchemy.orm import relationship, Session, foreign
-from sqlalchemy.ext.declarative import declarative_base
-import warnings
-from sqlalchemy.schema import CreateTable
-from datetime import datetime
+        id = Column(Integer, primary_key=True, comment = "Номер")
+        title = Column(String(100), nullable=False, comment = "Название книги")
+        author = Column(String(50), nullable=False, comment = "Автор")
+        published_year = Column(Integer, nullable=False, comment = "Год издания")
+        quantity = Column(Integer, comment="Количество книг в наличии")
+    
+        borrow_book = relationship("BorrowedBook", back_populates="book")
 
-warnings.filterwarnings("ignore")
-Base = declarative_base()
-class Books(Base):
-    __tablename__ = 'books'
+        def __repr__(self):
+            return f"<Books(id={self.id}, title={self.title}, author={self.author} published_year={self.published_year}, quantity={self.quantity})>"
 
-    id = Column(Integer, primary_key=True, comment = "Номер")
-    title = Column(String(100), nullable=False, comment = "Название книги")
-    author = Column(String(50), nullable=False, comment = "Автор")
-    published_year = Column(Integer, nullable=False, comment = "Год издания")
-    quantity = Column(Integer, comment="Количество книг в наличии")
+    class Readers(Base):
+        __tablename__ = 'readers'
 
-    borrow_book = relationship("BorrowedBook", back_populates="book")
+        id = Column(Integer, primary_key=True, comment = "Номер")
+        name = Column(String(100), nullable=False, comment = "ФИО читателя")
+        email = Column(String(100), nullable=False, unique=True, comment = "емейл")
+    
+        borrow_records = relationship("BorrowedBook", back_populates="reader")
+    
+        def __repr__(self):
+            return f"<Readers(id={self.id}, name={self.name}, email={self.email})>"
 
-    def __repr__(self):
-        return f"<Books(id={self.id}, title={self.title}, author={self.author} published_year={self.published_year}, quantity={self.quantity})>"
+    class BorrowedBooks(Base):
+        __tablename__ = 'borrowedbooks'
 
-class Readers(Base):
-    __tablename__ = 'readers'
+        id = Column(Integer, primary_key=True, comment = "Номер")
+        book_id = Column(Integer, ForeignKey('books.id'), nullable=False, comment = "Номер книги в каталоге")
+        reader_id = Column(Integer, ForeignKey('readers.id'), nullable=False, comment = "Код читателя")
+        borrow_date = Column(TIMESTAMP, default=datetime.now, nullable=False, comment = "Дата выдачи книги")
+        return_date = Column(TIMESTAMP, default=datetime.now, nullable=True, comment = "Дата возврата книги")
+    
+        book = relationship("Book", back_populates="borrow_book")
+        reader = relationship("Reader", back_populates="borrow_records")
+    
+        def __repr__(self):
+            return f"<Readers(id={self.id}, book_id={self.book_id}, reader_id={self.reader_id}, borrow_date={self.borrow_date}, return_date={self.return_date})>"
 
-    id = Column(Integer, primary_key=True, comment = "Номер")
-    name = Column(String(100), nullable=False, comment = "ФИО читателя")
-    email = Column(String(100), nullable=False, unique=True, comment = "емейл")
-
-    borrow_records = relationship("BorrowedBook", back_populates="reader")
-
-    def __repr__(self):
-        return f"<Readers(id={self.id}, name={self.name}, email={self.email})>"
-
-class BorrowedBooks(Base):
-    __tablename__ = 'borrowedbooks'
-
-    id = Column(Integer, primary_key=True, comment = "Номер")
-    book_id = Column(Integer, ForeignKey('books.id'), nullable=False, comment = "Номер книги в каталоге")
-    reader_id = Column(Integer, ForeignKey('readers.id'), nullable=False, comment = "Код читателя")
-    borrow_date = Column(TIMESTAMP, default=datetime.now, nullable=False, comment = "Дата выдачи книги")
-    return_date = Column(TIMESTAMP, default=datetime.now, nullable=True, comment = "Дата возврата книги")
-
-    book = relationship("Book", back_populates="borrow_book")
-    reader = relationship("Reader", back_populates="borrow_records")
-
-    def __repr__(self):
-        return f"<Readers(id={self.id}, book_id={self.book_id}, reader_id={self.reader_id}, borrow_date={self.borrow_date}, return_date={self.return_date})>"
-
-if __name__ == "__main__":
-    engine = create_engine("postgresql+psycopg2://postgres:1234@localhost/postgres")
+    if __name__ == "__main__":
+        engine = create_engine("postgresql+psycopg2://postgres:1234@localhost/postgres")
 
     with engine.connect() as conn:
         print("connected")
@@ -101,8 +101,6 @@ if __name__ == "__main__":
 
 Создайте миграции для создания таблиц Books, Readers и BorrowedBooks.
 Примените миграции к базе данных.
-
-
 
 ## Реализация основных функций в Python:
 
@@ -122,7 +120,7 @@ if __name__ == "__main__":
 Возврат книги. Обновляйте количество книг при возврате и устанавливайте дату возврата.
 ![img_17.png](img_17.png)
 ![img_18.png](img_18.png)
-PS У меня так и не получилось понять почему не ннаходятся книги из списка выданных, если делаю запрос списка выданных книг, там они есть, но почему-то обратно не возвращаются
+PS У меня так и не получилось понять почему не находятся книги из списка выданных, если делаю запрос списка выданных книг, там они есть, но почему-то обратно не возвращаются
 
 
 Запрос списка всех книг, отсортированных по году выпуска.
@@ -141,9 +139,33 @@ PS У меня так и не получилось понять почему н�
 ## Дополнительные задачи:
 
 Добавьте возможность поиска книг по автору или названию.
+![img_19.png](img_19.png)
+![img_20.png](img_20.png)
 
+поиск книги по автору, которой нет в базе данных
+![img_21.png](img_21.png)
+![img_22.png](img_22.png)
+
+поиск книги по названию
+![img_23.png](img_23.png)
+поиск книга по названию, отсутствующей в базе
+![img_24.png](img_24.png)
 Реализуйте функции для удаления книг и читателей из базы данных (при этом удаление книги должно быть возможно только, если она не выдана читателям).
+-удаление книги
+![img_25.png](img_25.png)
+список книг до удаления
+![img_26.png](img_26.png)
+список книг после удаления
+![img_27.png](img_27.png)
+попытка удалить книгу, которая выдана читателю
+![img_28.png](img_28.png)
 
-Создайте тесты для проверки правильности работы всех функций.
+-удаление читателя
+с выданными книгами ![img_29.png](img_29.png) ![img_30.png](img_30.png)
+без выданных книг ![img_31.png](img_31.png) 
+до удаления ![img_32.png](img_32.png)
+после удаления ![img_33.png](img_33.png)
 
+### Создайте тесты для проверки правильности работы всех функций.
+-В программе курса не было тем как делать тесты проверки функций. На одной из консультаций Руслан показывал тесты, но я все равно не поняла как их делать.
 

@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, Integer, String, Text, ForeignKey, DECIMAL, TIMESTAMP, CheckConstraint, create_engine
 )
-
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import relationship, Session, foreign, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import warnings
@@ -181,55 +181,61 @@ def borrowed_books_list():
 
 def search_by_author(author: str):
     books = session.query(Books).filter(Books.author.ilike(f"%{author}%")).all()
-    return [{
-        "Номер": b.id,
-        "Название книги": b.title,
-        "Автор": b.author,
-        "Год издания": b.published_year,
-        "Количество": b.quantity
-    } for b in books]
-
-def search_by_name(name: str):
-    books = session.query(Books).filter(Books.author.ilike(f"%{name}%")).all()
-    return [{
-        "Номер": b.id,
-        "Название книги": b.title,
-        "Автор": b.author,
-        "Год издания": b.published_year,
-        "Количество": b.quantity
-    } for b in books]
-
-def delete_book(id: int):
-    book = session.query(Books).get(id)
-    if not book:
-        print(f"Книга с ID {id} не найдена")
+    if not books:
+        print("Книга не найдена")
         return
-
-    active_borrows = session.query(BorrowedBooks).filter_by(book_id=id, return_date=None).count()
-    if active_borrows > 0:
-        print("Невозможно удалить книгу: она выдана читателям.")
-        return
-
-    session.delete(book)
-    session.commit()
-    print(f"Книга '{book.title}' успешно удалена.")
+    else:
+        for b in books:
+            print(f"Найдены книги: {b.title}, {b.title}, {b.published_year}")
     return
 
+def search_by_name(name: str):
+    books = session.query(Books).filter(Books.title.ilike(f"%{name}%")).all()
+    if not books:
+        print("Книга не найдена")
+        return
 
-def delete_reader(name: int):
+    else:
+        for b in books:
+            print(f"Найдены книги: {b.title}, {b.title}, {b.published_year}")
+    return
 
-    reader = session.query(Readers).get(name)
+def delete_book(title: str) -> str:
+    try:
+        book = session.query(Books).filter_by(title=title).first()
+
+        if not book:
+            print(f"Книга {title} не найдена")
+            return
+
+        active_borrows = session.query(BorrowedBooks).filter_by(book_id=book.id, return_date=None).count()
+        if active_borrows > 0:
+            print(f"Нельзя удалить книгу: {active_borrows}, она выдана читателям.")
+            return
+
+        session.delete(book)
+        session.commit()
+        print(f"Книга '{book.title}' успешно удалена.")
+        return
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Ошибка при удалении: {str(e)})")
+        return
+
+
+def delete_reader(name: str) -> str:
+
+    reader = session.query(Readers).filter_by(name=name).first()
     if not reader:
         print(f"Читатель {name} не найден.")
         return
 
 
-    active_borrows = session.query(BorrowedBooks).filter_by(name=name, return_date=None).count()
+    active_borrows = session.query(BorrowedBooks).filter_by(reader_id=reader.id, return_date=None).count()
     if active_borrows > 0:
-        print(f"Невозможно удалить читателя: у него есть невозвращённые книги.")
+        print(f"Невозможно удалить читателя {name} у него есть невозвращённые книги.")
         return
 
-    # Удаляем читателя
     session.delete(reader)
     session.commit()
     print(f"Читатель '{reader.name}' успешно удалён.")
@@ -279,8 +285,19 @@ if __name__ == "__main__":
         # borrowed_books_list()
 
         # return_book(12, 4)
-        return_book(8, 2)
+        # return_book(8, 2)
         # return_book(2, 5)
+
+        # search_by_author("Николай Носов")
+        # search_by_author("Илья Седых")
+        # search_by_name("Вафельное сердце")
+        # search_by_name("Мартышка и очки")
+
+        # delete_book("Ходячий замок")
+        # delete_book("Одиссея капитана Блада")
+
+        # delete_reader("Стасин Вячеслав Владимирович")
+        delete_reader("Петров Иван Семенович")
 
         conn.commit()
         # cur.close()
