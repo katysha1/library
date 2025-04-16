@@ -11,13 +11,13 @@
 - author (VARCHAR(50), NOT NULL)
 - published_year (INTEGER)
 - quantity (INTEGER, NOT NULL, CHECK (quantity >= 0))
-![img.png](img.png)
+![img_5.png](img_5.png)
 
 - Таблица для хранения читателей (Readers):
 - id (INTEGER, PRIMARY KEY)
 - name (VARCHAR(100), NOT NULL)
 - email (VARCHAR(100), UNIQUE)
-![img_1.png](img_1.png)
+![img_7.png](img_7.png)
 
 Таблица для регистрации выдачи книг (BorrowedBooks):
 - id (INTEGER, PRIMARY KEY)
@@ -26,7 +26,9 @@
 - borrow_date (TIMESTAMP, дата выдачи книги)
 - return_date (TIMESTAMP, дата возврата книги, может быть NULL)
 
-![img_2.png](img_2.png)
+![img_6.png](img_6.png)
+
+Код на создание таблиц и подключения к базе данных с помощью engine в файле tables
 
 Использование Alembic для создания миграций(необязательно):
 ![img_3.png](img_3.png)
