@@ -40,7 +40,7 @@ class Readers(Base):
         return f"<Readers(id={self.id}, name={self.name}, email={self.email})>"
 
 class BorrowedBooks(Base):
-    __tablename__ = 'borrowedbooks1'
+    __tablename__ = 'borrowedbooks'
 
     id = Column(Integer, primary_key=True, comment = "Номер")
     book_id = Column(Integer, ForeignKey('books.id'), nullable=False, comment = "Номер книги в каталоге")
