@@ -11,11 +11,13 @@
 - author (VARCHAR(50), NOT NULL)
 - published_year (INTEGER)
 - quantity (INTEGER, NOT NULL, CHECK (quantity >= 0))
+![img.png](img.png)
 
 - Таблица для хранения читателей (Readers):
 - id (INTEGER, PRIMARY KEY)
 - name (VARCHAR(100), NOT NULL)
 - email (VARCHAR(100), UNIQUE)
+![img_1.png](img_1.png)
 
 Таблица для регистрации выдачи книг (BorrowedBooks):
 - id (INTEGER, PRIMARY KEY)
@@ -24,12 +26,13 @@
 - borrow_date (TIMESTAMP, дата выдачи книги)
 - return_date (TIMESTAMP, дата возврата книги, может быть NULL)
 
-
+![img_2.png](img_2.png)
 
 Использование Alembic для создания миграций(необязательно):
+![img_3.png](img_3.png)
+![img_4.png](img_4.png)
 
 Создайте миграции для создания таблиц Books, Readers и BorrowedBooks.
-
 Примените миграции к базе данных.
 
 
